@@ -104,6 +104,7 @@ export function buildFinalAssessment(
       name: draft.company?.name ?? "",
       description: draft.company?.description ?? "",
       employee_range: draft.company?.employee_range ?? "1-10",
+      is_public_body: draft.company?.is_public_body ?? false,
     },
     ai_system: {
       name: draft.ai_system?.name,

@@ -2,6 +2,7 @@
 
 import { cn } from "../../lib/utils";
 import { EUAIActAssessmentInput } from "../../types/assessment";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
@@ -115,6 +116,16 @@ export default function Step1Company({ data, onChange, errors }: Props) {
           <p className="text-xs text-red-500">{errors.employee_range}</p>
         )}
       </div>
+
+      <label className="flex items-center gap-3 cursor-pointer">
+        <Checkbox
+          checked={data.is_public_body ?? false}
+          onCheckedChange={(checked) => onChange({ is_public_body: checked === true })}
+        />
+        <span className="text-sm text-slate-700">
+          We are a public body (government agency, regulator, law enforcement, or publicly-funded institution)
+        </span>
+      </label>
     </div>
   );
 }

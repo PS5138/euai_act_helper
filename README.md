@@ -7,11 +7,12 @@ and what you can do about it.
 
 This repo contains a frontend data collection form (`fe/`) and backend which uses LLMs to assess your AI act adherence (`be/`). You will need to run both.
 
-### LLM API key
+### Environment variables
 
-The backend service requires you to provide an Anthropic api key.
-1. Create a `/be/.env` file
-2. Add the environment variable `ANTHROPIC_API_KEY=<your api key>`
+`be/` and `fe/` have examples env files (`.env.example`), but you will need to complete some information
+(namely your Anthropic API key for the backend to summarise the data pertaining to the act).
+1. In each subfolder copy `.env.example` to `.env`
+2. Get your anthropic api key and populate `ANTHROPIC_API_KEY=<your_key>` in the backend .env
 
 ### Shortcuts
 

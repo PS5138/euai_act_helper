@@ -3,14 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EUAIActAssessmentInput } from "@/types/assessment";
+import { mapAssessmentToRequest } from "@/lib/mapToBackend";
 import ResultSummary from "@/components/results/ResultSummary";
 import JsonOutput from "@/components/results/JsonOutput";
+import FullReport, { ComplianceReport } from "@/components/results/FullReport";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Pencil } from "lucide-react";
+import { RotateCcw, Pencil, Sparkles, Loader2, AlertCircle } from "lucide-react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+type ReportState = "idle" | "loading" | "done" | "error";
 
 export default function ResultsPage() {
   const router = useRouter();
   const [assessment, setAssessment] = useState<EUAIActAssessmentInput | null>(null);
+  const [reportState, setReportState] = useState<ReportState>("idle");
+  const [fullReport, setFullReport] = useState<ComplianceReport | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("euai_assessment");
@@ -24,6 +33,33 @@ export default function ResultsPage() {
       router.replace("/assess");
     }
   }, [router]);
+
+  async function generateFullReport() {
+    if (!assessment) return;
+    setReportState("loading");
+    setReportError(null);
+
+    try {
+      const body = mapAssessmentToRequest(assessment);
+      const res = await fetch(`${API_URL}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const detail = await res.text();
+        throw new Error(`Server error ${res.status}: ${detail}`);
+      }
+
+      const data: ComplianceReport = await res.json();
+      setFullReport(data);
+      setReportState("done");
+    } catch (err) {
+      setReportError(err instanceof Error ? err.message : "Unknown error");
+      setReportState("error");
+    }
+  }
 
   if (!assessment) {
     return (
@@ -82,22 +118,64 @@ export default function ResultsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Left — human summary */}
+          {/* Left — client-side summary (always visible) */}
           <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-6">
             <ResultSummary assessment={assessment} />
           </div>
 
-          {/* Right — JSON output */}
+          {/* Right — JSON or full report */}
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6">
-            <JsonOutput assessment={assessment} />
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <p className="text-xs text-slate-500 mb-3">
-                Share this structured data with your compliance advisor or use it with the full risk assessment tool.
-              </p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" size="sm">
-                Generate Full Risk Assessment
-              </Button>
-            </div>
+            {reportState === "idle" && (
+              <>
+                <JsonOutput assessment={assessment} />
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-xs text-slate-500 mb-3">
+                    Get a full analysis from Claude — specific obligations, article references, and actionable next steps.
+                  </p>
+                  <Button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                    size="sm"
+                    onClick={generateFullReport}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Generate Full Risk Assessment
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {reportState === "loading" && (
+              <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+                <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+                <div>
+                  <p className="font-medium text-slate-800">Analysing with Claude…</p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    This takes about 30 seconds. Claude is researching the specific EU AI Act articles that apply to your system.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {reportState === "done" && fullReport && (
+              <FullReport report={fullReport} />
+            )}
+
+            {reportState === "error" && (
+              <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+                <AlertCircle className="h-8 w-8 text-red-400" />
+                <div>
+                  <p className="font-medium text-slate-800">Something went wrong</p>
+                  <p className="text-xs text-slate-500 mt-1 max-w-xs">{reportError}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateFullReport}
+                >
+                  Try again
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </main>

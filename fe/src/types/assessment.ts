@@ -67,6 +67,7 @@ export interface EUAIActAssessmentInput {
     name: string;
     description: string;
     employee_range: "1-10" | "11-50" | "51-250" | "251-1000" | "1000+";
+    is_public_body: boolean;
   };
   ai_system: {
     name?: string;
