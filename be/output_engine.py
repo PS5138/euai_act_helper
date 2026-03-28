@@ -16,6 +16,44 @@ from prompts import PROMPT_MAP, GPAI_TEMPLATE, ANNEX_III_TEXT
 
 load_dotenv()
 
+WEB_SEARCH_TOOL = {"type": "web_search_20250305", "name": "web_search"}
+MAX_PAUSE_TURN_RETRIES = 3
+ROLE_GUIDANCE = {
+    "provider": (
+        "Treat them as the organisation that develops or places the AI system "
+        "or model on the market. Focus on provider obligations such as design "
+        "choices, documentation, conformity work, instructions for use, and "
+        "steps needed before release or supply."
+    ),
+    "deployer": (
+        "Treat them as the organisation using the AI system in practice. Focus "
+        "on deployment duties such as human oversight, operational controls, "
+        "monitoring, disclosures to affected people, and following provider "
+        "instructions. Do not assign every provider obligation to them."
+    ),
+    "both": (
+        "Treat them as both provider and deployer. Clearly separate the "
+        "obligations that arise because they build or supply the system from "
+        "the obligations that arise because they use it in practice."
+    ),
+    "importer": (
+        "Treat them as an importer bringing the AI system into the EU market. "
+        "Focus on importer checks before making the system available, such as "
+        "verifying the provider and required documentation or markings, not "
+        "supplying systems they know are non-compliant, cooperating on "
+        "corrective action, and explaining when importer conduct could trigger "
+        "provider-like responsibility."
+    ),
+    "distributor": (
+        "Treat them as a distributor making the AI system available further "
+        "down the supply chain. Focus on distributor checks before onward "
+        "supply, such as verifying required instructions or markings are "
+        "present, not supplying systems they know are non-compliant, "
+        "cooperating on corrective action, and explaining when distributor "
+        "conduct could trigger provider-like responsibility."
+    ),
+}
+
 TIER_CONFIG = {
     "PROHIBITED": {
         "label": "Prohibited",
@@ -52,6 +90,26 @@ DISCLAIMER = (
 )
 
 
+def extract_text(message) -> str:
+    """Collect all text blocks from an Anthropic message response."""
+    text_parts = []
+    for block in message.content:
+        if block.type == "text":
+            text_parts.append(block.text)
+    return "\n".join(text_parts).strip()
+
+
+def build_role_guidance(role: str) -> str:
+    """Return role-specific instructions for the report prompt."""
+    return ROLE_GUIDANCE.get(
+        role,
+        (
+            "Use the stated role carefully and only describe obligations that "
+            "fit that role."
+        ),
+    )
+
+
 def build_prompt(result: dict) -> str:
     """Select the right template and inject all context."""
     tier = result["tier"]
@@ -66,6 +124,7 @@ def build_prompt(result: dict) -> str:
         "affected_group": result.get("affected_group", "Unknown"),
         "feature_flags": ", ".join(result.get("feature_flags", [])) or "None",
         "is_public_body": result.get("is_public_body", False),
+        "role_guidance": build_role_guidance(result.get("role", "Unknown")),
     }
 
     if tier == "HIGH_RISK":
@@ -80,6 +139,7 @@ def build_gpai_prompt(result: dict) -> str:
         org_name=result.get("org_name", "Unknown"),
         role=result.get("role", "Unknown"),
         description=result.get("description", "Not provided"),
+        role_guidance=build_role_guidance(result.get("role", "Unknown")),
     )
 
 
@@ -95,18 +155,35 @@ def call_claude(prompt: str, model: str = "claude-sonnet-4-20250514") -> str:
         "actual text where relevant."
     )
 
+    messages = [{"role": "user", "content": enhanced_prompt}]
     message = client.messages.create(
         model=model,
         max_tokens=8000,
-        tools=[{"type": "web_search_20250305", "name": "web_search"}],
-        messages=[{"role": "user", "content": enhanced_prompt}],
+        tools=[WEB_SEARCH_TOOL],
+        messages=messages,
     )
 
-    text_parts = []
-    for block in message.content:
-        if block.type == "text":
-            text_parts.append(block.text)
-    return "\n".join(text_parts)
+    for _ in range(MAX_PAUSE_TURN_RETRIES):
+        if message.stop_reason != "pause_turn":
+            break
+
+        messages.append({"role": "assistant", "content": message.content})
+        message = client.messages.create(
+            model=model,
+            max_tokens=8000,
+            tools=[WEB_SEARCH_TOOL],
+            messages=messages,
+        )
+    else:
+        raise RuntimeError(
+            "Claude paused too many times while searching the web for legal sources."
+        )
+
+    text = extract_text(message)
+    if not text:
+        raise RuntimeError("Claude returned no text content for the compliance report.")
+
+    return text
 
 
 def generate_report(result: dict) -> dict:
