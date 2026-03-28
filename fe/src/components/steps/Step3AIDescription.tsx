@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Info, Sparkles } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { EUAIActAssessmentInput, AICapability } from "@/types/assessment";
-import { detectCapabilities } from "@/lib/detect";
+import { useEffect } from "react";
+import { detectCapabilities } from "../../lib/detect";
+import { cn } from "../../lib/utils";
+import { AICapability, EUAIActAssessmentInput } from "../../types/assessment";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type AISystemData = Partial<EUAIActAssessmentInput["ai_system"]>;
 
@@ -24,7 +24,10 @@ const CAPABILITY_OPTIONS: { value: AICapability; label: string }[] = [
   { value: "image_video_generation", label: "Creates images, video or audio" },
   { value: "decision_making", label: "Makes or suggests decisions" },
   { value: "scoring_ranking", label: "Scores, ranks or rates" },
-  { value: "biometric_recognition", label: "Recognises faces, voices or identities" },
+  {
+    value: "biometric_recognition",
+    label: "Recognises faces, voices or identities",
+  },
   { value: "emotion_detection", label: "Detects emotions or mental states" },
   { value: "classification", label: "Classifies or categorises" },
   { value: "recommendation", label: "Recommends content or products" },
@@ -32,19 +35,27 @@ const CAPABILITY_OPTIONS: { value: AICapability; label: string }[] = [
   { value: "translation", label: "Translates languages" },
 ];
 
-export default function Step3AIDescription({ data, onChange, errors, prefilled }: Props) {
+export default function Step3AIDescription({
+  data,
+  onChange,
+  errors,
+  prefilled,
+}: Props) {
   const capabilities = data.capabilities ?? [];
 
   // Re-run auto-tagging whenever description changes — merge with manually selected
+  // biome-ignore lint/correctness/useExhaustiveDependencies: ok
   useEffect(() => {
     if (!data.description) return;
     const detected = detectCapabilities(data.description);
-    const merged = Array.from(new Set([...(data.capabilities ?? []), ...detected]));
+    const merged = Array.from(
+      new Set([...(data.capabilities ?? []), ...detected]),
+    );
     if (merged.length !== (data.capabilities ?? []).length) {
       onChange({ capabilities: merged });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.description]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.description, data.capabilities]);
 
   function toggleCapability(cap: AICapability) {
     const next = capabilities.includes(cap)
@@ -56,7 +67,9 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Describe your AI system</h2>
+        <h2 className="text-2xl font-bold text-slate-900">
+          Describe your AI system
+        </h2>
         <p className="mt-1 text-slate-500">
           Tell us about the AI product or feature you want assessed.
         </p>
@@ -73,7 +86,8 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
 
       <div className="space-y-2">
         <Label className="text-sm font-medium text-slate-700">
-          AI system name <span className="text-slate-400 font-normal">(optional)</span>
+          AI system name{" "}
+          <span className="text-slate-400 font-normal">(optional)</span>
         </Label>
         <Input
           placeholder="e.g. RecruitBot, Triage AI, SmartLens..."
@@ -94,10 +108,12 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
           <Textarea
             placeholder="e.g. Scans CVs to rank job candidates for open roles and suggests an interview shortlist to the hiring manager."
             value={data.description ?? ""}
-            onChange={(e) => onChange({ description: e.target.value.slice(0, 600) })}
+            onChange={(e) =>
+              onChange({ description: e.target.value.slice(0, 600) })
+            }
             className={cn(
               "bg-white min-h-[110px] resize-none",
-              errors.description && "border-red-400"
+              errors.description && "border-red-400",
             )}
           />
           <span className="absolute bottom-2 right-3 text-xs text-slate-400">
@@ -111,8 +127,12 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
 
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Label className="text-sm font-medium text-slate-700">What can it do?</Label>
-          <span className="text-xs text-slate-400">Auto-suggested from your description — tap to adjust</span>
+          <Label className="text-sm font-medium text-slate-700">
+            What can it do?
+          </Label>
+          <span className="text-xs text-slate-400">
+            Auto-suggested from your description — tap to adjust
+          </span>
         </div>
         <div className="flex flex-wrap gap-2">
           {CAPABILITY_OPTIONS.map((opt) => {
@@ -126,10 +146,11 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
                   "text-sm px-3 py-1.5 rounded-full border transition-all",
                   selected
                     ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
                 )}
               >
-                {selected ? "✓ " : ""}{opt.label}
+                {selected ? "✓ " : ""}
+                {opt.label}
               </button>
             );
           })}
@@ -150,7 +171,10 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
               <p className="text-xs">
-                A GPAI model can perform many different tasks and is made available to others to build on — like GPT-4, Claude, Llama, or Stable Diffusion. If you're building the foundation model itself (not just using one), answer Yes.
+                A GPAI model can perform many different tasks and is made
+                available to others to build on — like GPT-4, Claude, Llama, or
+                Stable Diffusion. If you're building the foundation model itself
+                (not just using one), answer Yes.
               </p>
             </TooltipContent>
           </Tooltip>
@@ -168,7 +192,7 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
                 "border-2 rounded-lg px-6 py-2.5 text-sm font-medium transition-all",
                 data.is_gpai === opt.value
                   ? "border-blue-600 bg-blue-50 text-blue-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
               )}
             >
               {opt.label}
@@ -185,7 +209,9 @@ export default function Step3AIDescription({ data, onChange, errors, prefilled }
             <Textarea
               placeholder="e.g. Customer service chatbots, document summarisation, code generation..."
               value={data.gpai_downstream_uses ?? ""}
-              onChange={(e) => onChange({ gpai_downstream_uses: e.target.value })}
+              onChange={(e) =>
+                onChange({ gpai_downstream_uses: e.target.value })
+              }
               className="bg-white min-h-[80px] resize-none"
             />
           </div>

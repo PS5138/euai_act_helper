@@ -1,9 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { EUAIActAssessmentInput, GeographyFlag, DeploymentStage } from "@/types/assessment";
+import { cn } from "../../lib/utils";
+import {
+  DeploymentStage,
+  EUAIActAssessmentInput,
+  GeographyFlag,
+} from "../../types/assessment";
+import { Checkbox } from "../ui/checkbox";
+import { Label } from "../ui/label";
 
 type RiskFlagData = Partial<EUAIActAssessmentInput["risk_flags"]>;
 
@@ -15,7 +19,11 @@ interface Props {
   errors: Record<string, string>;
 }
 
-const GEOGRAPHY_OPTIONS: { value: GeographyFlag; label: string; sub: string }[] = [
+const GEOGRAPHY_OPTIONS: {
+  value: GeographyFlag;
+  label: string;
+  sub: string;
+}[] = [
   {
     value: "targets_eu_users",
     label: "We target users or customers in the EU",
@@ -43,13 +51,34 @@ const GEOGRAPHY_OPTIONS: { value: GeographyFlag; label: string; sub: string }[] 
   },
 ];
 
-const STAGE_OPTIONS: { value: DeploymentStage; label: string; sub: string }[] = [
-  { value: "concept", label: "Concept / planning", sub: "Not yet in development" },
-  { value: "in_development", label: "In development", sub: "Being built, not yet deployed" },
-  { value: "deployed_internally", label: "Deployed internally", sub: "Used within our company only" },
-  { value: "deployed_to_customers", label: "Deployed to customers", sub: "Live with real users" },
-  { value: "scaled", label: "Scaled / widely deployed", sub: "Large-scale production use" },
-];
+const STAGE_OPTIONS: { value: DeploymentStage; label: string; sub: string }[] =
+  [
+    {
+      value: "concept",
+      label: "Concept / planning",
+      sub: "Not yet in development",
+    },
+    {
+      value: "in_development",
+      label: "In development",
+      sub: "Being built, not yet deployed",
+    },
+    {
+      value: "deployed_internally",
+      label: "Deployed internally",
+      sub: "Used within our company only",
+    },
+    {
+      value: "deployed_to_customers",
+      label: "Deployed to customers",
+      sub: "Live with real users",
+    },
+    {
+      value: "scaled",
+      label: "Scaled / widely deployed",
+      sub: "Large-scale production use",
+    },
+  ];
 
 export default function Step7Geography({
   riskFlags,
@@ -64,7 +93,9 @@ export default function Step7Geography({
     if (flag === "no_eu_exposure") {
       // Exclusive — deselects all others
       const alreadySelected = geography.includes("no_eu_exposure");
-      onRiskFlagsChange({ geography: alreadySelected ? [] : ["no_eu_exposure"] });
+      onRiskFlagsChange({
+        geography: alreadySelected ? [] : ["no_eu_exposure"],
+      });
       return;
     }
     // Deselect "no_eu_exposure" when selecting anything else
@@ -87,7 +118,9 @@ export default function Step7Geography({
       <div className="space-y-3">
         <Label className="text-sm font-medium text-slate-700">
           Where do you operate or plan to operate?{" "}
-          <span className="text-slate-400 font-normal">(select all that apply)</span>
+          <span className="text-slate-400 font-normal">
+            (select all that apply)
+          </span>
         </Label>
         <div className="space-y-2">
           {GEOGRAPHY_OPTIONS.map((opt) => {
@@ -99,7 +132,7 @@ export default function Step7Geography({
                   "flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all",
                   selected
                     ? "border-blue-600 bg-blue-50"
-                    : "border-slate-200 hover:border-slate-300 bg-white"
+                    : "border-slate-200 hover:border-slate-300 bg-white",
                 )}
               >
                 <Checkbox
@@ -108,14 +141,18 @@ export default function Step7Geography({
                   className="mt-0.5 flex-shrink-0"
                 />
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{opt.label}</p>
+                  <p className="text-sm font-medium text-slate-900">
+                    {opt.label}
+                  </p>
                   <p className="text-xs text-slate-500">{opt.sub}</p>
                 </div>
               </label>
             );
           })}
         </div>
-        {errors.geography && <p className="text-xs text-red-500">{errors.geography}</p>}
+        {errors.geography && (
+          <p className="text-xs text-red-500">{errors.geography}</p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -132,16 +169,22 @@ export default function Step7Geography({
                 "border-2 rounded-lg p-3 text-left cursor-pointer transition-all",
                 deploymentStage === opt.value
                   ? "border-blue-600 bg-blue-50"
-                  : "border-slate-200 hover:border-slate-300 bg-white"
+                  : "border-slate-200 hover:border-slate-300 bg-white",
               )}
             >
               <div className="flex items-start gap-3">
-                <div className={cn(
-                  "mt-0.5 h-4 w-4 rounded-full border-2 flex-shrink-0",
-                  deploymentStage === opt.value ? "border-blue-600 bg-blue-600" : "border-slate-300"
-                )} />
+                <div
+                  className={cn(
+                    "mt-0.5 h-4 w-4 rounded-full border-2 flex-shrink-0",
+                    deploymentStage === opt.value
+                      ? "border-blue-600 bg-blue-600"
+                      : "border-slate-300",
+                  )}
+                />
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{opt.label}</p>
+                  <p className="text-sm font-medium text-slate-900">
+                    {opt.label}
+                  </p>
                   <p className="text-xs text-slate-500">{opt.sub}</p>
                 </div>
               </div>
