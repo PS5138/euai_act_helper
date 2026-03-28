@@ -8,7 +8,7 @@ import ResultSummary from "@/components/results/ResultSummary";
 import JsonOutput from "@/components/results/JsonOutput";
 import FullReport, { ComplianceReport } from "@/components/results/FullReport";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Pencil, Sparkles, Loader2, AlertCircle } from "lucide-react";
+import { RotateCcw, SlidersHorizontal, Sparkles, Loader2, AlertCircle } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -17,6 +17,7 @@ type ReportState = "idle" | "loading" | "done" | "error";
 export default function ResultsPage() {
   const router = useRouter();
   const [assessment, setAssessment] = useState<EUAIActAssessmentInput | null>(null);
+  const [sourceSummary, setSourceSummary] = useState<string | null>(null);
   const [reportState, setReportState] = useState<ReportState>("idle");
   const [fullReport, setFullReport] = useState<ComplianceReport | null>(null);
   const [reportError, setReportError] = useState<string | null>(null);
@@ -24,13 +25,23 @@ export default function ResultsPage() {
   useEffect(() => {
     const stored = sessionStorage.getItem("euai_assessment");
     if (!stored) {
-      router.replace("/assess");
+      router.replace("/");
       return;
     }
     try {
       setAssessment(JSON.parse(stored));
     } catch {
-      router.replace("/assess");
+      router.replace("/");
+    }
+
+    try {
+      const meta = sessionStorage.getItem("euai_prefill_meta");
+      if (meta) {
+        const { source_summary } = JSON.parse(meta);
+        if (source_summary) setSourceSummary(source_summary);
+      }
+    } catch {
+      // non-critical
     }
   }, [router]);
 
@@ -84,18 +95,19 @@ export default function ResultsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => router.push("/assess")}
+              onClick={() => router.push("/assess?mode=edit")}
               className="gap-1.5 text-xs"
             >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit answers
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              See / edit answers
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 sessionStorage.removeItem("euai_assessment");
-                router.push("/assess");
+                sessionStorage.removeItem("euai_prefill_meta");
+                router.push("/");
               }}
               className="gap-1.5 text-xs"
             >
@@ -112,9 +124,15 @@ export default function ResultsPage() {
             Your EU AI Act Assessment
           </h1>
           <p className="text-slate-500 mt-1">
-            Based on your answers for{" "}
-            <span className="font-medium text-slate-700">{assessment.company.name}</span>
+            Based on publicly available information for{" "}
+            <span className="font-medium text-slate-700">{assessment.company.name || "your company"}</span>
           </p>
+          {sourceSummary && (
+            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+              <Sparkles className="h-3 w-3 inline" />
+              {sourceSummary}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
