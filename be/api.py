@@ -12,8 +12,9 @@ Tom's frontend calls:
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models import ClassificationRequest, ComplianceReport, TierConfig
+from models import ClassificationRequest, ComplianceReport, TierConfig, PrefillRequest, PrefillResponse, PrefillCompany, PrefillAISystem, PrefillDeployment, PrefillRiskFlags
 from output_engine import generate_report, TIER_CONFIG, DISCLAIMER
+from prefill_engine import research_company
 
 app = FastAPI(
     title="EU AI Act Compliance Helper — Output API",
@@ -36,6 +37,25 @@ app.add_middleware(
 def root():
     """Health check."""
     return {"status": "ok", "service": "eu-ai-act-output-api"}
+
+
+@app.post("/prefill", response_model=PrefillResponse)
+def prefill_assessment(request: PrefillRequest):
+    """
+    Research a company by domain and return a pre-filled assessment draft.
+    The frontend uses this to skip the wizard and go straight to results.
+    """
+    try:
+        data = research_company(request.domain)
+        return PrefillResponse(
+            company=PrefillCompany(**(data.get("company") or {})),
+            ai_system=PrefillAISystem(**(data.get("ai_system") or {})),
+            deployment=PrefillDeployment(**(data.get("deployment") or {})),
+            risk_flags=PrefillRiskFlags(**(data.get("risk_flags") or {})),
+            source_summary=data.get("source_summary") or "",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/report", response_model=ComplianceReport)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AssessmentDraft, DeploymentStage } from "@/types/assessment";
 import { buildFinalAssessment } from "@/lib/classify";
 import { detectCapabilities, detectDomain } from "@/lib/detect";
@@ -62,6 +62,9 @@ function validate(step: number, draft: AssessmentDraft): Record<string, string> 
 
 export default function WizardShell() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get("mode") === "edit";
+
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<AssessmentDraft>(INITIAL_DRAFT);
   const [deploymentStage, setDeploymentStage] = useState<DeploymentStage | undefined>();
@@ -70,8 +73,29 @@ export default function WizardShell() {
   const [aiDescriptionPrefilled, setAIDescriptionPrefilled] = useState(false);
   const [prefillConfidence, setPrefillConfidence] = useState<Record<string, boolean>>({});
 
-  // Load pre-fill data from the landing page URL fetch
+  // Load existing assessment (edit mode from results page) or legacy prefill data
   useEffect(() => {
+    if (isEditMode) {
+      const stored = sessionStorage.getItem("euai_assessment");
+      if (!stored) { router.replace("/"); return; }
+      try {
+        const assessment = JSON.parse(stored);
+        // Map EUAIActAssessmentInput back to AssessmentDraft
+        setDraft({
+          company: assessment.company,
+          ai_system: assessment.ai_system,
+          deployment: assessment.deployment,
+          risk_flags: assessment.risk_flags,
+        });
+        setAIDescriptionPrefilled(true);
+        setPrefillConfidence({ description: true });
+      } catch {
+        router.replace("/");
+      }
+      return;
+    }
+
+    // Legacy: prefill from old euai_prefill key (manual wizard entry point)
     const stored = sessionStorage.getItem("euai_prefill");
     if (!stored) return;
     try {
@@ -83,7 +107,7 @@ export default function WizardShell() {
     } catch {
       // ignore malformed data
     }
-  }, []);
+  }, [isEditMode, router]);
 
   function updateCompany(update: Partial<AssessmentDraft["company"]>) {
     setDraft((d) => ({ ...d, company: { ...d.company, ...update } }));
@@ -127,9 +151,7 @@ export default function WizardShell() {
 
     if (step === TOTAL_STEPS) {
       const assessment = buildFinalAssessment(draft);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("euai_assessment", JSON.stringify(assessment));
-      }
+      sessionStorage.setItem("euai_assessment", JSON.stringify(assessment));
       router.push("/results");
       return;
     }
@@ -149,11 +171,24 @@ export default function WizardShell() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-4 py-4">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-              EU AI Act
-            </span>
-            <span className="text-sm text-slate-500">Compliance Helper</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                EU AI Act
+              </span>
+              <span className="text-sm text-slate-500">
+                {isEditMode ? "Edit Answers" : "Compliance Helper"}
+              </span>
+            </div>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={() => router.push("/results")}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                ← Back to results
+              </button>
+            )}
           </div>
           <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} stepTitles={STEP_TITLES} />
         </div>

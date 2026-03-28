@@ -104,3 +104,49 @@ class ComplianceReport(BaseModel):
     gpai_report: Optional[str] = None  # markdown from Claude if GPAI
     disclaimer: str
     input_summary: dict        # echo back the inputs for display
+
+
+# ── Prefill endpoint ──────────────────────────────────────────────────────────
+
+class PrefillRequest(BaseModel):
+    """Domain to research, e.g. 'acme.com'."""
+    domain: str = Field(..., min_length=1, max_length=253)
+
+
+class PrefillCompany(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    employee_range: Optional[str] = None   # "1-10"|"11-50"|"51-250"|"251-1000"|"1000+"
+    is_public_body: Optional[bool] = None
+
+
+class PrefillAISystem(BaseModel):
+    description: Optional[str] = None
+    capabilities: list[str] = Field(default_factory=list)
+    is_gpai: Optional[bool] = None
+    human_oversight: Optional[str] = None  # "full"|"partial"|"none"
+    automated_decision_making: Optional[bool] = None
+
+
+class PrefillDeployment(BaseModel):
+    role: Optional[str] = None             # "provider"|"deployer"|"both"|"unsure"
+    domain: Optional[str] = None           # FE Domain values (e.g. "healthcare")
+    end_users: Optional[str] = None        # "businesses"|"consumers"|"public_authorities"|"mixed"
+    third_party_ai: Optional[str] = None
+
+
+class PrefillRiskFlags(BaseModel):
+    geography: list[str] = Field(default_factory=list)
+    consequential_decisions: Optional[bool] = None
+    high_risk_indicators: list[str] = Field(default_factory=list)
+    prohibited_flags: list[str] = Field(default_factory=list)
+    vulnerable_populations: Optional[bool] = None
+    transparency_obligations: Optional[bool] = None
+
+
+class PrefillResponse(BaseModel):
+    company: PrefillCompany
+    ai_system: PrefillAISystem
+    deployment: PrefillDeployment
+    risk_flags: PrefillRiskFlags
+    source_summary: str  # 1-2 sentence plain-English summary for display

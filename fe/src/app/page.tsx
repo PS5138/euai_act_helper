@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Globe, Loader2, AlertCircle } from "lucide-react";
-import { extractDraftFromScrape } from "@/lib/extract";
+import { buildFinalAssessment } from "@/lib/classify";
 import { AssessmentDraft } from "@/types/assessment";
 
-const INITIAL_DRAFT: AssessmentDraft = {
+const EMPTY_DRAFT: AssessmentDraft = {
   company: {},
   ai_system: {},
   deployment: {},
@@ -44,31 +44,39 @@ export default function LandingPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong fetching that URL.");
+        setError(data.error ?? "Something went wrong. Try filling in the form manually.");
         setLoading(false);
         return;
       }
 
-      const { draft, confidence } = extractDraftFromScrape(data);
-
-      // Merge extracted draft over initial empty draft
-      const merged: AssessmentDraft = {
-        company: { ...INITIAL_DRAFT.company, ...draft.company },
-        ai_system: { ...INITIAL_DRAFT.ai_system, ...draft.ai_system },
-        deployment: { ...INITIAL_DRAFT.deployment, ...draft.deployment },
-        risk_flags: { ...INITIAL_DRAFT.risk_flags, ...draft.risk_flags },
+      // Merge the LLM-returned prefill data over empty defaults
+      const draft: AssessmentDraft = {
+        company: { ...EMPTY_DRAFT.company, ...(data.company ?? {}) },
+        ai_system: { ...EMPTY_DRAFT.ai_system, ...(data.ai_system ?? {}) },
+        deployment: { ...EMPTY_DRAFT.deployment, ...(data.deployment ?? {}) },
+        risk_flags: { ...EMPTY_DRAFT.risk_flags, ...(data.risk_flags ?? {}) },
       };
 
-      sessionStorage.setItem("euai_prefill", JSON.stringify({ draft: merged, confidence, prefilled: true }));
-      router.push("/assess");
+      // Build the full assessment (adds preliminary_classification)
+      const assessment = buildFinalAssessment(draft);
+
+      // Store for both results page and wizard edit mode
+      sessionStorage.setItem("euai_assessment", JSON.stringify(assessment));
+      sessionStorage.setItem(
+        "euai_prefill_meta",
+        JSON.stringify({ source_summary: data.source_summary ?? "" })
+      );
+
+      router.push("/results");
     } catch {
-      setError("Could not reach that URL. Try filling in the form manually.");
+      setError("Could not reach the analysis service. Try filling in the form manually.");
       setLoading(false);
     }
   }
 
   function handleManual() {
-    sessionStorage.removeItem("euai_prefill");
+    sessionStorage.removeItem("euai_assessment");
+    sessionStorage.removeItem("euai_prefill_meta");
     router.push("/assess");
   }
 
@@ -89,7 +97,7 @@ export default function LandingPage() {
             Know your EU AI Act<br />obligations in minutes
           </h1>
           <p className="text-lg text-slate-500">
-            Enter your company website and we'll pre-fill your assessment automatically — then you review and confirm.
+            Enter your company website and we'll analyse your AI Act obligations automatically.
           </p>
         </div>
 
@@ -115,7 +123,7 @@ export default function LandingPage() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Fetching…
+                  Analysing…
                 </>
               ) : (
                 <>
@@ -125,6 +133,12 @@ export default function LandingPage() {
               )}
             </Button>
           </div>
+
+          {loading && (
+            <p className="text-sm text-slate-500 text-left">
+              Researching your company with AI — this takes about 15 seconds…
+            </p>
+          )}
 
           {error && (
             <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-left">
@@ -145,7 +159,7 @@ export default function LandingPage() {
 
         {/* Trust note */}
         <p className="text-xs text-slate-400">
-          We only fetch your public homepage. No data is stored.
+          We use AI web search to research your company. No data is stored.
         </p>
       </div>
     </div>
