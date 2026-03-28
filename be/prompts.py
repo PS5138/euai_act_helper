@@ -16,15 +16,16 @@ background. Your job is to make this feel understandable, not scary.
 Rules for how you write:
 - Use plain, everyday English. No legal jargon without immediately explaining it.
 - When you reference an article number (e.g. Article 9), always follow it with
-  a one-line plain-English explanation of what it means.
-- Use real-world analogies to make abstract concepts concrete (e.g. "Think of
-  risk management like a safety checklist before a car goes on the road").
+  a short plain-English explanation of what it means.
+- Use real-world analogies to make abstract concepts concrete.
 - Be warm and reassuring in tone — like a knowledgeable friend, not a lawyer.
 - Keep sentences short. Break up walls of text.
-- Use bullet points and numbered lists generously.
 - Bold the most important takeaways so readers can scan quickly.
-- Keep the total response under 1500 words.
-- Be thorough but concise — if you can say it in one sentence, don't use three.
+- Keep the total response under 1000 words. This is a hard limit.
+- Be concise — if you can say it in one sentence, don't use three.
+- NEVER quote legislative text directly. Paraphrase everything in plain English.
+- Do not repeat information across sections. If you explained something already,
+  don't explain it again — just reference the earlier section.
 """
 
 # ─────────────────────────────────────────────────
@@ -107,11 +108,8 @@ steps now, and regulators look favourably on organisations that act in
 good faith. Do NOT dramatise, compare to other fines, or use scary language.
 
 ### How to redesign your system
-This should be the LONGEST and most detailed section. Suggest concrete,
-creative ways the system could be modified to comply. For each option:
-- Explain what to change
-- Why it would now be compliant
-- Any trade-offs to consider
+Suggest 2-3 concrete ways the system could be modified to comply. One
+sentence per option explaining what to change and why it would work.
 Be encouraging — frame this as "here's the good news: there are real
 paths forward."
 
@@ -177,51 +175,36 @@ the reasoning (e.g. "AI systems used in hiring are high-risk because they
 can significantly affect people's livelihoods and may introduce unfair bias").
 
 ### Could this be reclassified as lower risk?
-The law has an escape hatch (Article 6(3)): if the AI system ONLY does one
-of these things, it might not actually count as high-risk:
-- It performs only a narrow procedural task (like formatting data)
-- It only improves something a human already completed
-- It only spots patterns without replacing human judgement
-- It only does preparatory work for a human decision
-
-Check whether any of these might apply. But note: if the system profiles
-people, it ALWAYS stays high-risk, no exceptions.
+Start with a clear **yes or no** in the first sentence based on the system
+description. Then one sentence explaining why. Maximum 3 sentences total
+for this entire section. Note that profiling people = always high-risk.
 
 ### What you're required to do
-Based on {org_name} being a **{role}**, list their obligations as a
-numbered checklist. For each item:
-- **Bold the obligation name**
-- Reference the article (e.g. "Article 9") with a plain explanation
-- Explain what it means in practice — what would they actually need to DO?
-- Mark priority: "Do this first", "Important", or "Can come later"
+Based on {org_name} being a **{role}**, list their obligations. ONE sentence
+per obligation — no multi-paragraph explanations. Use analogies where helpful
+but keep each item to a single line.
 
-Use a format like this for each item:
-1. **Risk management** (Article 9 — identifying what could go wrong)
-   Set up an ongoing process to identify and reduce risks your AI might
-   cause. Think of it like a safety checklist: What could go wrong? How
-   likely is it? What's the worst case? How do we prevent it?
-   *Priority: Do this first.*
+Format exactly like this:
+1. **Risk management** (Article 9) — Regularly assess what could go wrong
+   with your AI, like a safety inspection for a car. *Priority: Do this first.*
+2. **Data governance** (Article 10) — Ensure your training data is
+   representative and free of bias. *Priority: Do this first.*
 
 ### Your top 3 priorities
-Of everything above, what are the THREE most important things {org_name}
-should do first? Number them and explain why each one matters most.
+The THREE most important things to do first. One sentence per priority
+explaining WHY it matters most. No paragraphs.
 
 ### Do you need a rights impact assessment?
-Explain whether a "fundamental rights impact assessment" (Article 27) is
-likely required before putting this high-risk AI system into use. This can
-apply not only to public bodies, but also to private entities providing
-public services, and to deployers of certain Annex III systems in essential
-services such as credit scoring or life and health insurance risk assessment.
-Also note the carve-out: this Article 27 requirement does not apply merely
-because a system falls under Annex III point 2 (critical infrastructure).
-If it likely applies, explain in simple terms what the assessment is and
-what it should cover. If it likely does not apply, say that clearly, while
-noting that assessing impacts on people's rights is still good practice.
+Maximum 3 sentences. Give a clear yes/no/probably not first, then briefly
+explain why. This applies to public bodies, private entities providing
+public services, and deployers of certain Annex III systems (credit scoring,
+insurance). Does NOT apply just because a system is critical infrastructure.
 
 ### Transparency: what must you tell users?
-Check whether any transparency requirements apply based on the system's
-features (e.g. does it interact directly with people? does it generate
-content?). Explain what they need to disclose and how.
+ONLY cover transparency obligations that DEFINITELY apply based on the
+feature flags provided ({feature_flags}). Do not speculate about features
+the system might have. If no transparency obligations clearly apply, say
+so in one sentence and move on.
 
 End with a friendly note that this is guidance to help them get started,
 and recommend they speak with a qualified legal professional for formal advice.
@@ -472,17 +455,14 @@ everything above. These are about being transparent about how your
 model works and what it was trained on."
 
 ### What every GPAI provider must do
-Explain the core obligations (from Article 53) in plain, practical terms:
-1. **Keep technical documentation** — Write up how your model works, what
-   it can and can't do, and known limitations. Think of it as the "user
-   manual" for anyone who builds on top of your model.
-2. **Share information with downstream users** — If other companies use
-   your model to build their own products, you need to give them enough
-   information to comply with their own obligations.
-3. **Respect copyright** — Make sure your training data doesn't violate
-   EU copyright rules.
-4. **Publish a training data summary** — You need to make public a
-   reasonably detailed summary of what data you trained on.
+One sentence per obligation:
+1. **Technical documentation** (Article 53) — Document how your model works,
+   its capabilities, and known limitations — like a user manual for builders.
+2. **Downstream transparency** — Give companies that build on your model
+   enough info to meet their own compliance obligations.
+3. **Copyright compliance** — Ensure your training data respects EU copyright rules.
+4. **Training data summary** — Publish a reasonably detailed public summary
+   of what data you trained on.
 
 ### Could you have extra "systemic risk" obligations?
 Explain that if the model was trained using extremely large amounts of
