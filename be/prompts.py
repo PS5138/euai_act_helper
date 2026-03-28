@@ -23,6 +23,8 @@ Rules for how you write:
 - Keep sentences short. Break up walls of text.
 - Use bullet points and numbered lists generously.
 - Bold the most important takeaways so readers can scan quickly.
+- Keep the total response under 1500 words.
+- Be thorough but concise — if you can say it in one sentence, don't use three.
 """
 
 # ─────────────────────────────────────────────────
@@ -48,6 +50,9 @@ But this doesn't mean the end of the road — there are usually ways to adapt.
 - How much does the AI decide on its own? {autonomy}
 - Who is affected by the AI's decisions? {affected_group}
 - Notable features: {feature_flags}
+
+## Role-specific guidance for this report
+{role_guidance}
 
 ## Your task
 Write a clear, supportive, and constructive report for {org_name}.
@@ -129,8 +134,8 @@ certain standards and keep records.
 
 ## About this organisation
 - Name: {org_name}
-- Their role: {role} — this matters because "providers" (who build the AI) have
-  more obligations than "deployers" (who use AI someone else built)
+- Their role: {role} — tailor the report to the obligations that match that
+  role, which may differ for providers, deployers, importers, and distributors
 - Are they a government/public body? {is_public_body}
 - Industry: {domain}
 
@@ -147,6 +152,9 @@ The EU maintains a specific list of AI uses they consider high-risk (called
 "Annex III"). Use this to identify which category applies:
 
 {annex_iii_text}
+
+## Role-specific guidance for this report
+{role_guidance}
 
 ## Your task
 Write a clear, practical compliance guide for {org_name}. They need to
@@ -199,12 +207,16 @@ Of everything above, what are the THREE most important things {org_name}
 should do first? Number them and explain why each one matters most.
 
 ### Do you need a rights impact assessment?
-If {org_name} is a public body ({is_public_body}), they need to do a
-"fundamental rights impact assessment" (Article 27) before deploying.
-Explain what this is in simple terms — it's basically checking whether the
-AI could unfairly affect people's basic rights. If they're not a public
-body, note that this specific requirement doesn't apply to them, but it's
-still good practice.
+Explain whether a "fundamental rights impact assessment" (Article 27) is
+likely required before putting this high-risk AI system into use. This can
+apply not only to public bodies, but also to private entities providing
+public services, and to deployers of certain Annex III systems in essential
+services such as credit scoring or life and health insurance risk assessment.
+Also note the carve-out: this Article 27 requirement does not apply merely
+because a system falls under Annex III point 2 (critical infrastructure).
+If it likely applies, explain in simple terms what the assessment is and
+what it should cover. If it likely does not apply, say that clearly, while
+noting that assessing impacts on people's rights is still good practice.
 
 ### Transparency: what must you tell users?
 Check whether any transparency requirements apply based on the system's
@@ -238,6 +250,9 @@ people about the fact that they're interacting with AI.
 - How much does the AI decide on its own? {autonomy}
 - Who is affected? {affected_group}
 - Notable features: {feature_flags}
+
+## Role-specific guidance for this report
+{role_guidance}
 
 ## Your task
 Write a clear, reassuring guide for {org_name}. Keep it concise — limited
@@ -312,26 +327,35 @@ under the Act. You're in the clear.
 - How much does the AI decide on its own? {autonomy}
 - Who is affected? {affected_group}
 
+## Role-specific guidance for this report
+{role_guidance}
+
 ## Your task
 Write a brief, positive guide for {org_name}. This is good news — frame
-it that way! But make sure they know about the one universal rule and
-the things that could change their classification.
+it that way! But make sure they know about the baseline AI literacy
+expectation for relevant roles and the things that could change their
+classification.
 
 Format your response using these exact headers:
 
 ### In plain English
 Start with 2-3 sentences. Something like: "Great news — your AI system is
 classified as minimal risk under the EU AI Act, which means you don't have
-any mandatory compliance requirements. That said, there's one rule that
-applies to everyone, and a few things worth keeping an eye on."
+any mandatory compliance requirements. That said, there is still an important
+baseline expectation for providers and deployers, and a few things worth
+keeping an eye on."
 
-### The one rule that applies to everyone: AI literacy
-There's one requirement in the EU AI Act (Article 4) that applies to ALL
-AI systems, even minimal risk ones: **AI literacy**. Explain in simple
-terms what this means — basically, the people in the organisation who work
-with or make decisions about the AI need to understand it well enough to
-use it responsibly. Give 2-3 practical examples of what this looks like
-(e.g. training sessions, documentation, understanding limitations).
+### The key baseline rule for providers and deployers: AI literacy
+Article 4 is aimed at **providers and deployers of AI systems**. If
+{role} is provider, deployer, or both, explain that they should take
+measures to ensure that the people dealing with the AI on their behalf have
+enough AI literacy to use it responsibly in context. Explain this simply:
+the relevant staff should understand what the system does, where it can go
+wrong, and how to interpret or challenge its outputs. If {role} is importer
+or distributor, say this Article 4 duty is not framed around them in the
+same direct way, but AI literacy is still a smart practical step. Give 2-3
+practical examples of what this looks like (e.g. training sessions,
+documentation, understanding limitations).
 
 ### Voluntary best practices
 Mention that the EU encourages organisations to voluntarily adopt good
@@ -363,10 +387,14 @@ Act does not apply to it. But there are conditions to be aware of.
 
 ## About this organisation
 - Name: {org_name}
+- Their role: {role}
 - Industry: {domain}
 
 ## What the AI system does
 {description}
+
+## Role-specific guidance for this report
+{role_guidance}
 
 ## Your task
 Write a brief, clear explanation for {org_name}. Keep it concise — 2-3
@@ -424,6 +452,9 @@ of the risk level above.
 
 ## What the AI system does
 {description}
+
+## Role-specific guidance for this report
+{role_guidance}
 
 ## Your task
 Write a clear, practical section explaining the GPAI-specific obligations.
