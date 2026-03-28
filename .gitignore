@@ -38,3 +38,4 @@ yarn-error.log*
 eu_ai_act_helper_env/
 eu-ai-act-output-plan-v2.md
 playground.py
+.next
