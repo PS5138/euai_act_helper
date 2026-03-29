@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-
-const BE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { researchCompany } from "@/lib/server/prefill-engine";
 
 export async function POST(req: NextRequest) {
   let url: string;
@@ -22,26 +21,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${BE_URL}/prefill`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ domain }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      return Response.json(
-        { error: data.detail ?? "Backend error" },
-        { status: res.status }
-      );
-    }
-
+    const data = await researchCompany(domain);
     return Response.json(data);
-  } catch {
-    return Response.json(
-      { error: "Could not reach the analysis service. Is the backend running?" },
-      { status: 502 }
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return Response.json({ error: message }, { status: 500 });
   }
 }

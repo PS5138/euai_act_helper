@@ -10,8 +10,6 @@ import FullReport, { ComplianceReport } from "@/components/results/FullReport";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, SlidersHorizontal, Sparkles, Loader2, AlertCircle } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 type ReportState = "idle" | "loading" | "done" | "error";
 
 export default function ResultsPage() {
@@ -52,7 +50,7 @@ export default function ResultsPage() {
 
     try {
       const body = mapAssessmentToRequest(assessment);
-      const res = await fetch(`${API_URL}/report`, {
+      const res = await fetch(`/api/report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

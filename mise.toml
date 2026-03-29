@@ -1,6 +1,5 @@
 [tools]
 node = "lts"
-python = "3.11"
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
 
@@ -10,34 +9,12 @@ run = """
 echo "→ Installing frontend dependencies..."
 cd fe && npm install
 
-echo "→ Creating Python virtualenv..."
-cd ../be && python -m venv .venv
-
-echo "→ Installing backend dependencies..."
-cd ../be && .venv/bin/pip install -r requirements.txt
-
-echo "✓ Done. Copy be/.env.example to be/.env and add your ANTHROPIC_API_KEY."
+echo "✓ Done. Copy fe/.env.example to fe/.env and add your ANTHROPIC_API_KEY."
 """
 
-# ─── Individual services ──────────────────────────────────────────────────────
-
-[tasks.fe]
-description = "Start Next.js frontend on :3000"
-dir = "fe"
-run = "npm run dev"
-
-[tasks.be]
-description = "Start FastAPI backend on :8000"
-dir = "be"
-run = ".venv/bin/uvicorn api:app --reload --port 8000"
-
-# ─── Dev (both together) ──────────────────────────────────────────────────────
+# ─── Dev ──────────────────────────────────────────────────────────────────────
 
 [tasks.dev]
-description = "Start frontend and backend in parallel (Ctrl+C stops both)"
-run = """
-trap 'kill 0' SIGINT SIGTERM
-(cd fe && npm run dev) &
-(cd be && .venv/bin/uvicorn api:app --reload --port 8000) &
-wait
-"""
+description = "Start Next.js on :3000"
+dir = "fe"
+run = "npm run dev"
