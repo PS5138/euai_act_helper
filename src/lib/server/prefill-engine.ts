@@ -5,7 +5,10 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const WEB_SEARCH_TOOL = { type: "web_search_20250305", name: "web_search" } as const;
+const WEB_SEARCH_TOOL = {
+  type: "web_search_20250305",
+  name: "web_search",
+} as const;
 const MAX_PAUSE_TURN_RETRIES = 5;
 
 const PREFILL_PROMPT = `You are a research assistant helping to pre-fill an EU AI Act compliance assessment.
@@ -104,11 +107,13 @@ function extractJson(text: string): Record<string, unknown> {
   }
 
   throw new Error(
-    `Could not parse JSON from Claude response: ${text.slice(0, 200)}`
+    `Could not parse JSON from Claude response: ${text.slice(0, 200)}`,
   );
 }
 
-export async function researchCompany(domain: string): Promise<Record<string, unknown>> {
+export async function researchCompany(
+  domain: string,
+): Promise<Record<string, unknown>> {
   // Strip protocol and path — just the bare domain
   const clean = domain
     .trim()
@@ -124,7 +129,7 @@ export async function researchCompany(domain: string): Promise<Record<string, un
   ];
 
   let message = await client.messages.create({
-    model: "claude-sonnet-4-5-20251001",
+    model: "claude-sonnet-4-5",
     max_tokens: 2000,
     tools: [WEB_SEARCH_TOOL],
     messages,
@@ -135,7 +140,7 @@ export async function researchCompany(domain: string): Promise<Record<string, un
 
     messages.push({ role: "assistant", content: message.content });
     message = await client.messages.create({
-      model: "claude-sonnet-4-5-20251001",
+      model: "claude-sonnet-4-5",
       max_tokens: 2000,
       tools: [WEB_SEARCH_TOOL],
       messages,

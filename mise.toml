@@ -12,8 +12,10 @@ npm install
 echo "✓ Done. Copy .env.example to .env and add your ANTHROPIC_API_KEY."
 """
 
-# ─── Dev ──────────────────────────────────────────────────────────────────────
-
 [tasks.dev]
 description = "Start Next.js on :3000"
 run = "npm run dev"
+
+[tasks.start]
+description = "Build and run server"
+run = "npm run build && npm run start"

@@ -6,7 +6,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { PROMPT_MAP, GPAI_TEMPLATE, ANNEX_III_TEXT } from "./prompts";
 
-const WEB_SEARCH_TOOL = { type: "web_search_20250305", name: "web_search" } as const;
+const WEB_SEARCH_TOOL = {
+  type: "web_search_20250305",
+  name: "web_search",
+} as const;
 const MAX_PAUSE_TURN_RETRIES = 3;
 
 const ROLE_GUIDANCE: Record<string, string> = {
@@ -40,7 +43,10 @@ const ROLE_GUIDANCE: Record<string, string> = {
     "conduct could trigger provider-like responsibility.",
 };
 
-export const TIER_CONFIG: Record<string, { label: string; colour: string; summary: string }> = {
+export const TIER_CONFIG: Record<
+  string,
+  { label: string; colour: string; summary: string }
+> = {
   PROHIBITED: {
     label: "Prohibited",
     colour: "red",
@@ -89,7 +95,10 @@ function buildRoleGuidance(role: string): string {
   );
 }
 
-function interpolate(template: string, vars: Record<string, string | boolean>): string {
+function interpolate(
+  template: string,
+  vars: Record<string, string | boolean>,
+): string {
   return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? ""));
 }
 
@@ -146,7 +155,7 @@ async function callClaude(prompt: string): Promise<string> {
   ];
 
   let message = await client.messages.create({
-    model: "claude-sonnet-4-5-20251001",
+    model: "claude-sonnet-4-5",
     max_tokens: 8000,
     tools: [WEB_SEARCH_TOOL],
     messages,
@@ -157,7 +166,7 @@ async function callClaude(prompt: string): Promise<string> {
 
     messages.push({ role: "assistant", content: message.content });
     message = await client.messages.create({
-      model: "claude-sonnet-4-5-20251001",
+      model: "claude-sonnet-4-5",
       max_tokens: 8000,
       tools: [WEB_SEARCH_TOOL],
       messages,
@@ -165,14 +174,16 @@ async function callClaude(prompt: string): Promise<string> {
 
     if (i === MAX_PAUSE_TURN_RETRIES - 1) {
       throw new Error(
-        "Claude paused too many times while searching the web for legal sources."
+        "Claude paused too many times while searching the web for legal sources.",
       );
     }
   }
 
   const text = extractText(message);
   if (!text) {
-    throw new Error("Claude returned no text content for the compliance report.");
+    throw new Error(
+      "Claude returned no text content for the compliance report.",
+    );
   }
   return text;
 }
@@ -200,7 +211,7 @@ export interface ComplianceReportData {
 }
 
 export async function generateReport(
-  result: Record<string, unknown>
+  result: Record<string, unknown>,
 ): Promise<ComplianceReportData> {
   const tier = result.tier as string;
 
