@@ -1,30 +1,71 @@
-# EU AI act risks
+# EU AI Act Compliance Helper
 
-**<u>NOTE: Ongoing development is happening at [TTitcombe/euai_act_helper](https://github.com/TTitcombe/euai_act_helper).</u>**
+Know your EU AI Act obligations in minutes.
+
+![EU AI Act Compliance Helper](assets/screenshot.png)
+
+Enter your company website and the tool will automatically research your AI systems, classify them under the EU AI Act, and generate a tailored compliance report — no legal expertise required.
 
 ---
 
-Utility tool to identify where your company might be at risk of the EU AI act,
-and what you can do about it.
+## How it works
+
+1. **Enter your company URL** — the tool uses AI web search to research your company and pre-fill the assessment form automatically.
+2. **Review or fill in the form** — a 7-step wizard covers your company details, AI system description, deployment context, and risk flags. You can edit anything the AI pre-filled.
+3. **Get your compliance report** — the tool classifies your AI system (Prohibited / High-risk / Limited / Minimal / Excluded) and generates a detailed report with specific EU AI Act article references and actionable obligations.
+
+---
 
 ## Getting started
 
-### Environment variables
+### Prerequisites
 
-The root has an example env file (`.env.example`), but you will need to complete some information
-(namely your Anthropic API key for the backend to summarise the data pertaining to the act).
-1. Copy `.env.example` to `.env`
-2. Get your anthropic api key and populate `ANTHROPIC_API_KEY=<your_key>`
+- [Node.js](https://nodejs.org/) (LTS)
+- An [Anthropic API key](https://console.anthropic.com/)
+- Optionally: [mise](https://mise.jdx.dev/) for task shortcuts
 
-### Shortcuts
+### Setup
 
-We've setup a [mise-en-place][mise] (`mise.toml`) file to provide shortcuts for running the app. Once you've installed [mise], you can run this repo with:
+1. Clone the repo and install dependencies:
 
 ```bash
-npm i
-
-# Spin up the frontend and backend services.
-mise r dev
+npm install
 ```
 
-[mise]: https://mise.jdx.dev/
+2. Copy the example env file and add your API key:
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` and set:
+
+```
+ANTHROPIC_API_KEY=your_key_here
+```
+
+3. Start the app:
+
+```bash
+# With mise
+mise r dev
+
+# Without mise
+npm run dev
+```
+
+The app runs at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Tech stack
+
+- **Frontend & backend**: [Next.js](https://nextjs.org/) (TypeScript) — a single monorepo, no separate backend service needed
+- **AI**: [Anthropic Claude](https://www.anthropic.com/) with web search for company research and compliance report generation
+- **UI**: [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+
+---
+
+## Disclaimer
+
+This tool is for informational purposes only and does not constitute legal advice. The EU AI Act is complex and its interpretation may vary by jurisdiction and circumstance. Please consult qualified legal counsel for compliance decisions.

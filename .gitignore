@@ -1,41 +1,43 @@
-# ─── Frontend (fe/) ───────────────────────────────────────────────────────────
-fe/node_modules
-fe/.next/
-fe/out/
-fe/build
-fe/*.tsbuildinfo
-fe/next-env.d.ts
-fe/.pnp
-fe/.env
-fe/.pnp.*
-fe/.yarn/*
-!fe/.yarn/patches
-!fe/.yarn/plugins
-!fe/.yarn/releases
-!fe/.yarn/versions
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+eu_ai_act_helper_env/
 
-# ─── Backend (be/) ────────────────────────────────────────────────────────────
-be/.venv/
-be/__pycache__/
-be/*.pyc
-be/*.pyo
-be/.env
+# ─── Next.js ──────────────────────────────────────────────────────────────────
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
 
-# ─── Root ─────────────────────────────────────────────────────────────────────
+# ─── Environment ──────────────────────────────────────────────────────────────
+.env*
+
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
 .DS_Store
 *.pem
-.env*
 .vercel
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# debug logs
+# ─── Debug logs ───────────────────────────────────────────────────────────────
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# legacy (pre-split)
-/node_modules
-eu_ai_act_helper_env/
+# ─── Local files ──────────────────────────────────────────────────────────────
+Presentation/
+presentation/
 eu-ai-act-output-plan-v2.md
 playground.py
-.next
