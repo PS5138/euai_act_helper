@@ -1,6 +1,6 @@
 # EU AI act risks
 
-> **Note:** Ongoing development is happening at [TTitcombe/euai_act_helper](https://github.com/TTitcombe/euai_act_helper).
+**<u>Ongoing development is happening at [TTitcombe/euai_act_helper](https://github.com/TTitcombe/euai_act_helper).</u>**
 
 Utility tool to identify where your company might be at risk of the EU AI act,
 and what you can do about it.
