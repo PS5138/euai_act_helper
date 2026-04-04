@@ -1,24 +1,17 @@
-"""
-EU AI Act Compliance Helper — Company Research / Pre-fill Engine
+/**
+ * EU AI Act Compliance Helper — Company Research / Pre-fill Engine
+ * TypeScript port of be/prefill_engine.py
+ */
 
-Given a company domain, uses Claude with web search to research the company
-and return a structured AssessmentDraft (using FE field names/values) so the
-FE can pre-populate the wizard or go straight to the results page.
-"""
+import Anthropic from "@anthropic-ai/sdk";
 
-import json
-import os
-import re
+const WEB_SEARCH_TOOL = {
+  type: "web_search_20250305",
+  name: "web_search",
+} as const;
+const MAX_PAUSE_TURN_RETRIES = 5;
 
-from anthropic import Anthropic
-from dotenv import load_dotenv
-
-load_dotenv()
-
-WEB_SEARCH_TOOL = {"type": "web_search_20250305", "name": "web_search"}
-MAX_PAUSE_TURN_RETRIES = 5
-
-PREFILL_PROMPT = """You are a research assistant helping to pre-fill an EU AI Act compliance assessment.
+const PREFILL_PROMPT = `You are a research assistant helping to pre-fill an EU AI Act compliance assessment.
 
 Your task: research the company at the domain "{domain}" and extract structured information about them and their AI products/services.
 
@@ -93,67 +86,80 @@ operates_critical_infrastructure
 - Only include geography flags that are clearly evidenced (e.g. "incorporated_in_eu" only if the company is demonstrably EU-based).
 - is_gpai should be true only if this company is a foundation-model or general-purpose AI provider (e.g. builds LLMs, image generation models, etc.).
 - Return ONLY the JSON object. No other text.
-"""
+`;
 
+function extractJson(text: string): Record<string, unknown> {
+  // Try direct parse first
+  try {
+    return JSON.parse(text.trim());
+  } catch {
+    // fall through
+  }
 
-def extract_json(text: str) -> dict:
-    """Extract JSON object from Claude's response, handling any surrounding text."""
-    # Try direct parse first
-    try:
-        return json.loads(text.strip())
-    except json.JSONDecodeError:
-        pass
+  // Try to find a JSON object in the text
+  const match = text.match(/\{[\s\S]*\}/);
+  if (match) {
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      // fall through
+    }
+  }
 
-    # Try to find a JSON object in the text
-    match = re.search(r'\{[\s\S]*\}', text)
-    if match:
-        try:
-            return json.loads(match.group())
-        except json.JSONDecodeError:
-            pass
+  throw new Error(
+    `Could not parse JSON from Claude response: ${text.slice(0, 200)}`,
+  );
+}
 
-    raise ValueError(f"Could not parse JSON from Claude response: {text[:200]}")
+export async function researchCompany(
+  domain: string,
+): Promise<Record<string, unknown>> {
+  // Strip protocol and path — just the bare domain
+  const clean = domain
+    .trim()
+    .replace(/^https?:\/\//, "")
+    .split("/")[0]
+    .trim();
 
+  const client = new Anthropic();
+  const prompt = PREFILL_PROMPT.replace(/\{domain\}/g, clean);
 
-def research_company(domain: str) -> dict:
-    """
-    Research a company by domain and return a dict matching AssessmentDraft shape.
-    All fields are optional — the FE merges this over empty defaults.
-    """
-    # Strip protocol and path — just the bare domain
-    clean = re.sub(r'^https?://', '', domain.strip())
-    clean = clean.split('/')[0].strip()
+  const messages: Anthropic.MessageParam[] = [
+    { role: "user", content: prompt },
+  ];
 
-    client = Anthropic()
-    prompt = PREFILL_PROMPT.format(domain=clean)
+  let message = await client.messages.create({
+    model: "claude-sonnet-4-5",
+    max_tokens: 2000,
+    tools: [WEB_SEARCH_TOOL],
+    messages,
+  });
 
-    messages = [{"role": "user", "content": prompt}]
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=2000,
-        tools=[WEB_SEARCH_TOOL],
-        messages=messages,
-    )
+  for (let i = 0; i < MAX_PAUSE_TURN_RETRIES; i++) {
+    if (message.stop_reason !== "pause_turn") break;
 
-    for _ in range(MAX_PAUSE_TURN_RETRIES):
-        if message.stop_reason != "pause_turn":
-            break
-        messages.append({"role": "assistant", "content": message.content})
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2000,
-            tools=[WEB_SEARCH_TOOL],
-            messages=messages,
-        )
-    else:
-        raise RuntimeError("Claude paused too many times during company research.")
+    messages.push({ role: "assistant", content: message.content });
+    message = await client.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 2000,
+      tools: [WEB_SEARCH_TOOL],
+      messages,
+    });
 
-    text_parts = [
-        block.text for block in message.content if block.type == "text"
-    ]
-    raw_text = "\n".join(text_parts).strip()
+    if (i === MAX_PAUSE_TURN_RETRIES - 1) {
+      throw new Error("Claude paused too many times during company research.");
+    }
+  }
 
-    if not raw_text:
-        raise RuntimeError("Claude returned no text for company research.")
+  const rawText = message.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("\n")
+    .trim();
 
-    return extract_json(raw_text)
+  if (!rawText) {
+    throw new Error("Claude returned no text for company research.");
+  }
+
+  return extractJson(rawText);
+}

@@ -1,15 +1,9 @@
-"""
-EU AI Act Compliance Helper — Prompt Templates
+/**
+ * EU AI Act Compliance Helper — Prompt Templates
+ * TypeScript port of be/prompts.py
+ */
 
-All prompt templates live here. Edit these and re-run playground.py to iterate.
-Each template uses Python string .format() placeholders like {org_name}, {description}, etc.
-"""
-
-# ─────────────────────────────────────────────────
-# Shared persona instruction — prepended to every prompt
-# ─────────────────────────────────────────────────
-
-PERSONA = """You are a friendly, approachable EU AI Act advisor. Imagine you're explaining
+const PERSONA = `You are a friendly, approachable EU AI Act advisor. Imagine you're explaining
 things to a smart person who has NEVER read the EU AI Act and doesn't have a legal
 background. Your job is to make this feel understandable, not scary.
 
@@ -26,13 +20,11 @@ Rules for how you write:
 - NEVER quote legislative text directly. Paraphrase everything in plain English.
 - Do not repeat information across sections. If you explained something already,
   don't explain it again — just reference the earlier section.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# PROHIBITED (Article 5)
-# ─────────────────────────────────────────────────
-
-PROHIBITED_TEMPLATE = PERSONA + """
+const PROHIBITED_TEMPLATE =
+  PERSONA +
+  `
 ## Background
 The EU AI Act is a European law that regulates artificial intelligence. It sorts
 AI systems into risk categories. This system has been classified as **PROHIBITED**
@@ -116,13 +108,11 @@ paths forward."
 End with a warm, encouraging note that this is guidance to help them
 find the best path forward, and suggest speaking with a legal professional
 for advice specific to their situation.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# HIGH RISK (Annex III / Article 6)
-# ─────────────────────────────────────────────────
-
-HIGH_RISK_TEMPLATE = PERSONA + """
+const HIGH_RISK_TEMPLATE =
+  PERSONA +
+  `
 ## Background
 The EU AI Act is a European law that regulates artificial intelligence. It sorts
 AI systems into risk categories. This system has been classified as **HIGH-RISK**
@@ -208,13 +198,11 @@ so in one sentence and move on.
 
 End with a friendly note that this is guidance to help them get started,
 and recommend they speak with a qualified legal professional for formal advice.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# LIMITED RISK (Article 50 transparency)
-# ─────────────────────────────────────────────────
-
-LIMITED_TEMPLATE = PERSONA + """
+const LIMITED_TEMPLATE =
+  PERSONA +
+  `
 ## Background
 The EU AI Act is a European law that regulates artificial intelligence. This
 system has been classified as **LIMITED RISK** — which is good news! It means
@@ -285,13 +273,11 @@ domain and use case.
 
 End with a friendly note that this is guidance, and recommend a legal
 professional for formal advice.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# MINIMAL RISK
-# ─────────────────────────────────────────────────
-
-MINIMAL_TEMPLATE = PERSONA + """
+const MINIMAL_TEMPLATE =
+  PERSONA +
+  `
 ## Background
 The EU AI Act is a European law that regulates artificial intelligence. This
 system has been classified as **MINIMAL RISK** — which is great news! It means
@@ -356,13 +342,11 @@ the trigger would be and what risk category it would move to.
 
 End with a friendly note that this is guidance, and recommend they
 periodically reassess as their AI system evolves.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# EXCLUDED (Article 2)
-# ─────────────────────────────────────────────────
-
-EXCLUDED_TEMPLATE = PERSONA + """
+const EXCLUDED_TEMPLATE =
+  PERSONA +
+  `
 ## Background
 The EU AI Act is a European law that regulates artificial intelligence. This
 system appears to be **EXCLUDED** from the law entirely — meaning the EU AI
@@ -414,13 +398,11 @@ to..." — keep it brief and constructive.
 
 End with a friendly note that this is guidance, and suggest they reassess
 if their situation changes.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# GPAI add-on (Chapter V — appended to any tier)
-# ─────────────────────────────────────────────────
-
-GPAI_TEMPLATE = PERSONA + """
+export const GPAI_TEMPLATE =
+  PERSONA +
+  `
 ## Background
 On top of the risk classification above, {org_name} is also a provider of
 a **General-Purpose AI (GPAI) model**. Think of GPAI like a foundation or
@@ -482,25 +464,17 @@ on GPAI compliance. Make these actionable and concrete.
 
 End with a note that this is guidance and recommend they consult a legal
 professional, especially for the technical documentation requirements.
-"""
+`;
 
-# ─────────────────────────────────────────────────
-# Lookup map — used by playground.py
-# ─────────────────────────────────────────────────
+export const PROMPT_MAP: Record<string, string> = {
+  PROHIBITED: PROHIBITED_TEMPLATE,
+  HIGH_RISK: HIGH_RISK_TEMPLATE,
+  LIMITED: LIMITED_TEMPLATE,
+  MINIMAL: MINIMAL_TEMPLATE,
+  EXCLUDED: EXCLUDED_TEMPLATE,
+};
 
-PROMPT_MAP = {
-    "PROHIBITED": PROHIBITED_TEMPLATE,
-    "HIGH_RISK": HIGH_RISK_TEMPLATE,
-    "LIMITED": LIMITED_TEMPLATE,
-    "MINIMAL": MINIMAL_TEMPLATE,
-    "EXCLUDED": EXCLUDED_TEMPLATE,
-}
-
-# ─────────────────────────────────────────────────
-# Annex III condensed reference (injected into HIGH_RISK prompt)
-# ─────────────────────────────────────────────────
-
-ANNEX_III_TEXT = """
+export const ANNEX_III_TEXT = `
 # EU AI Act — Annex III High-Risk Use Cases (condensed)
 
 ## 1. Biometrics
@@ -543,4 +517,4 @@ Safety components in: digital infrastructure, road traffic, water, gas, heating,
 ## 8. Justice & democratic processes
 (a) Assisting judicial authorities in researching/interpreting/applying law
 (b) Influencing election outcomes or voting behaviour (NOT campaign logistics tools)
-"""
+`;
